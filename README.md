@@ -1,12 +1,12 @@
 # BruteProxy.py framework
 
 ## What's this about?
-Have you ever been brute-forcing and got IP-banned because the website has a limited amount of try? Well, in most cases, this blocking system identifies you based on your IPv4 address. BruteProxy is (for now) **single-thread brote-forcing script with looping proxies**, that are taken from provided proxylist. BruteProxy.py has built-in console and Metasploit-like commands (set, run, etc.) to easily access all it's features.
+Have you ever been brute-forcing and got IP-banned because the website has a limited amount of try? Well, in most cases, this blocking system identifies you based on your IPv4 address. BruteProxy is (for now) **single-thread brute-forcing script with looping proxies**, that are taken from provided proxylist. BruteProxy.py has built-in console and Metasploit-like commands (set, run, etc.) to easily access all it's features.
 	
 ## Installation
 Before you start the actual installation, make sure you have installed:
-	- Python3
-	- requests library for Python
+- Python3
+- requests library for Python
 If you don't know what you have installed or not, take a quick peek at the next few lines. If you do, proceed to BruteProxy.py installation from GitHub.
 
 ### Python3 installation
@@ -135,7 +135,8 @@ Feel free to contact me on `exploits@esec.sk`. If you have found a bug or have o
 Contributors are welcome, just submit a pull request and I'll take a look.
 
 ## Current dev-team and license
-On **BruteProxy.py** project is curretly working **one** developer: Anton Pernisch *(100%)*
+On **BruteProxy.py** project is curretly working **one** developer(s):
+- Anton Pernisch *(100%)*
 
 BruteProxy.py framework is distributed and protected under [Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)](https://creativecommons.org/licenses/by-nc-nd/4.0/) license.
 
