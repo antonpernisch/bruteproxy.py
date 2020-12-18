@@ -3,7 +3,7 @@ import requests
 from signal import signal, SIGINT
 from sys import exit
 import re
-from inc/Attacker import attacker
+from Modules.Attacker import attacker
 
 # define colors
 # colors in ansi color coding
