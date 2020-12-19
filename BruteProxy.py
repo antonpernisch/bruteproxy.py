@@ -7,7 +7,7 @@ from Modules.Attacker import attacker
 import sys, getopt
 
 # build info
-build_version = "b1.0.0"
+build_version = "b1.1.0dev"
 
 # define colors
 # colors in ansi color coding
