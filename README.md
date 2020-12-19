@@ -78,7 +78,7 @@ BP.py> exit
 ```
 
 **Let's take a quick peek on how to set up arguments and start an attack:**
-1. Firstly, before you execute attack, you must make sure that all required values are set up correctly. To show what values are currently assigned, execute `values` command, just like so:
+Firstly, before you execute attack, you must make sure that all required values are set up correctly. To show what values are currently assigned, execute `values` command, just like so:
 ```sh
 BP.py> values
 ```
