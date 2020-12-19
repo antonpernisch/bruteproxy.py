@@ -7,7 +7,7 @@ from Modules.Attacker import attacker
 import sys, getopt
 
 # build info
-build_version = "a1.0.0dev"
+build_version = "b1.0.0"
 
 # define colors
 # colors in ansi color coding
@@ -53,6 +53,8 @@ attack__wordlist = "(unset)"
 attack__username = "(unset)"
 attack__proxylist = "(unset)"
 attack__errIdentifier = "(unset)"
+attack__usernameParameterName = "username"
+attack__passwordParameterName = "password"
 
 # some regxes (it was pain, ngl)
 run__target_pattern = re.compile("^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$")
@@ -124,6 +126,9 @@ def cmd__set(param, value):
         print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "proxylist: " + colors.ENDC + "Sets the proxylist that will be used while bruteforcing, ie. /proxies/proxylist.txt")
         print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "username: " + colors.ENDC + "Sets the username that will be bruteforced, ie. admin")
         print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "error_identifier: " + colors.ENDC + "Identifies error message (unsuccessful login try)")
+        print(colors.OKCYAN + "[]" + colors.ENDC)
+        print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "username_parameter: " + colors.ENDC + "Sets the POST parameter name for username input")
+        print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "password_parameter: " + colors.ENDC + "Sets the POST parameter name for password input")
     elif param == "target":
         global attack__target
         attack__target = value
@@ -144,6 +149,14 @@ def cmd__set(param, value):
         global attack__errIdentifier
         attack__errIdentifier = value
         print(colors.OKCYAN + "[" + colors.OKGREEN + colors.BOLD + "\u2713" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.DARK_CYAN + "Parameter \"error_identifier\" was set to " + colors.OKCYAN + value + colors.ENDC)
+    elif param == "username_parameter":
+        global attack__usernameParameterName
+        attack__usernameParameterName = value
+        print(colors.OKCYAN + "[" + colors.OKGREEN + colors.BOLD + "\u2713" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.DARK_CYAN + "Parameter \"username_parameter\" was set to " + colors.OKCYAN + value + colors.ENDC)
+    elif param == "password_parameter":
+        global attack__passwordParameterName
+        attack__passwordParameterName = value
+        print(colors.OKCYAN + "[" + colors.OKGREEN + colors.BOLD + "\u2713" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.DARK_CYAN + "Parameter \"password_parameter\" was set to " + colors.OKCYAN + value + colors.ENDC)
     else:
         print(colors.OKCYAN + "[" + colors.FAIL + colors.BOLD + "!" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.FAIL + "Unknown parameter, you can display all parameters by \"set options\"" + colors.ENDC)
 
@@ -155,6 +168,9 @@ def cmd__values():
     print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "proxylist: " + colors.ENDC + attack__proxylist)
     print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "username: " + colors.ENDC + attack__username)
     print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "error_identifier: " + colors.ENDC + attack__errIdentifier)
+    print(colors.OKCYAN + "[]" + colors.ENDC)
+    print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "username_parameter: " + colors.ENDC + attack__usernameParameterName)
+    print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "password_parameter: " + colors.ENDC + attack__passwordParameterName)
 
 # run
 def cmd__run():
@@ -166,7 +182,7 @@ def cmd__run():
 
     if(cmd__run_check_result == 400 and attack__username != "(unset)"):
         # everything's fine, proceed to actual bruteforce class
-        attacker.attack(0, attack__target, attack__username, attack__wordlist, attack__proxylist, attack__errIdentifier)
+        attacker.attack(0, attack__target, attack__username, attack__wordlist, attack__proxylist, attack__errIdentifier, attack__usernameParameterName, attack__passwordParameterName)
     else:
         # we've got something wrong, let's tell it to the user
         if cmd__run_check_result == 100:
@@ -234,6 +250,8 @@ print(colors.DARK_CYAN + "BruteProxy.py framework for bruteforcing\nvia HTTP req
 print(colors.DARK_CYAN + "Exit by typing \"exit\" command or by pressing Ctrl+C")
 print(colors.DARK_CYAN + "Illegal usage is strongly restricted.")
 print(colors.DARK_CYAN + "(c) Anton Pernisch 2020" + colors.ENDC)
+print(" ")
+print(colors.DARK_CYAN + "Using version: " + colors.BOLD + build_version + colors.ENDC)
 print(" ")
 print(" ")
 print(" ")
