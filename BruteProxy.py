@@ -192,6 +192,7 @@ def cmd__run():
 
     if(cmd__run_check_result == 400 and attack__username != "(unset)"):
         # everything's fine, proceed to actual bruteforce class
+        attacker.setup(0, attack__method)
         attacker.attack(0, attack__target, attack__username, attack__wordlist, attack__proxylist, attack__errIdentifier, attack__usernameParameterName, attack__passwordParameterName)
     else:
         # we've got something wrong, let's tell it to the user
