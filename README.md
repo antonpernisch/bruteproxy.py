@@ -9,6 +9,7 @@ Have you ever been brute-forcing and got IP-banned because the website has a lim
 
 ### Pre-requirements
 **To check if Python3 is installed:**
+
 Before you start installing requirements, make sure you have installed Python3 by typing
 ```sh
 $ python3 --version
