@@ -6,42 +6,30 @@
 Have you ever been brute-forcing and got IP-banned because the website has a limited amount of try? Well, in most cases, this blocking system identifies you based on your IPv4 address. BruteProxy is (for now) **single-thread brute-forcing script with looping proxies**, that are taken from provided proxylist. BruteProxy.py has built-in console and Metasploit-like commands (set, run, etc.) to easily access all it's features.
 	
 ## Installation
-Before you start the actual installation, make sure you have installed:
-- Python3
-- requests library for Python
-If you don't know what you have installed or not, take a quick peek at the next few lines. If you do, proceed to BruteProxy.py installation from GitHub.
 
-### Python3 installation
+### Pre-requirements
 **To check if Python3 is installed:**
-1. Open terminal on your Linux machine
-2. Type:
+Before you start installing requirements, make sure you have installed Python3 by typing
 ```sh
 $ python3 --version
 ```
-3. If you will get 
-```sh
-Python 3.x.x
-```
-as response, Python3 **is** installed. However, if not and you'll get error message that command is unknown, just type:
+If you get `Python 3.x.x` as response, Python3 **is** installed. However, if not and you'll get error message that command is unknown, just type:
 ```sh
 $ sudo apt install python3.8
 ```
 and you should be fine. If not, please do a small research on how to install Python3, focus of this README is not an installation of Python3.
 
-### requests installation
-1. First things first, make sure you've got a pip command installed. To do so, just type this in CLI:
+**To check if pip is installed:**
+1. Type:
 ```sh
 $ sudo apt install python3-pip
 ```
-and then
+2. Follow the installation instructions (if any)
+3. After the installation is done, execute:
 ```sh
 $ sudo apt-get update
 ```
-2. After installing pip, just execute in CLI:
-```sh
-$ sudo python3 -m pip install requests
-```
-3. You are now set up!
+4. pip should be installed by now.
 
 ### BruteProxy.py installation from GitHub
 1. Make sure that you have installed everything mentioned above.
@@ -50,14 +38,24 @@ $ sudo python3 -m pip install requests
 ```sh
 $ sudo git clone https://github.com/esec-exploits/bruteproxy.py.git
 ```
-4. When the installation will complete, you've successfully installed BruteProxy.py framework! To continue and learn how to use it, procees to Getting started.
+4. When the installation will complete, you've successfully installed BruteProxy.py framework! Before you start using it, you have to install requirements, just look at the next section Installing requirements. To continue and learn how to use the framewrok after installing requirements, proceed to Getting started.
 
-## Getting started
+### Installing requirements
 Once you have completed installation from GitHub using `git clone` command, you will notice new folder in your location, name of that folder should be `bruteproxy.py` (don't be confused that name ends with *.py* as if it's Python file, it's folder). Now go ahead and navigate to that folder by executing
 ```sh
 $ cd bruteproxy.py
 ```
-Now to start BruteProxy.py console, type
+Then just type:
+```sh
+$ pip install -r requirements.txt
+```
+After this process will end, you've successfully installed everything needed for BruteProxy.py framework. You can check what version you have installed, or just check if everything has been installed correctly by typing
+```sh
+$ sudo python3 BruteProxy.py -version
+```
+
+## Getting started
+Now to start BruteProxy.py console, type *(you have to be in folder where you installed the BruteProxy.py framework, there should be located a file named `BruteProxy.py`)*
 ```sh
 $ sudo python3 BruteProxy.py
 ```
@@ -133,7 +131,7 @@ BP.py> run
 Then, we just have to wait. Keep on mind that right now, BruteProxy.py is only sigle-thread brute-forcer, so it can take a while... We are working on adding multi-thread workflow.
 
 ## Contact & support
-Feel free to contact me on `exploits@esec.sk`. If you have found a bug or have ome kind of issue, just create a new issue here on GitHub and I'll review it :)
+Feel free to contact me on `exploits@esec.sk`. If you have found a bug or have some kind of issue, just create a new issue here on GitHub and I'll review it :)
 Contributors are welcome, just submit a pull request and I'll take a look.
 
 ## Current dev-team and license
