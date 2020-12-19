@@ -1,6 +1,6 @@
 # BruteProxy.py framework
 
-[![Build Status](https://travis-ci.com/esec-exploits/bruteproxy.py.svg?branch=main)](https://travis-ci.com/esec-exploits/bruteproxy.py) ![status](https://img.shields.io/badge/status-dev-red) ![Issues](https://img.shields.io/github/issues/esec-exploits/bruteproxy.py) ![commits](https://img.shields.io/github/commits-since/esec-exploits/bruteproxy.py/a1.0.0dev)
+[![Build Status](https://travis-ci.com/esec-exploits/bruteproxy.py.svg?branch=main)](https://travis-ci.com/esec-exploits/bruteproxy.py) ![status](https://img.shields.io/badge/status-beta-blue) ![Issues](https://img.shields.io/github/issues/esec-exploits/bruteproxy.py) ![commits](https://img.shields.io/github/commits-since/esec-exploits/bruteproxy.py/a1.0.0dev)
 
 ## What's this about?
 Have you ever been brute-forcing and got IP-banned because the website has a limited amount of tries? Well, in most cases, this blocking system identifies you based on your IPv4 address. BruteProxy is (for now) **single-thread brute-forcing script with looping proxies**, that are taken from provided proxylist. BruteProxy.py has built-in console and Metasploit-like commands (set, run, etc.) to easily access all it's features.
@@ -123,6 +123,20 @@ username will be used as username while brute-forcing and trying diffrent passwo
 BP.py> set error_identifier <text>
 ```
 error_identifier will be used when BruteProxy.py will be comparing the response from the server. It is necessary, because the BruteProxy.py can with this identify that tried password was incorrect and can move to next one. Basically, this is some keyword, that will be shown on page if the wrong credetials were written. For example if the wrong password message shown on the attacked page looks like this: `Oops! Password is incorrect! Try again...`, the error_identifier will be `incorrect`.
+
+### username_parameter
+**Usage:**
+```sh
+BP.py> set username_paramater <text>
+```
+username_parameters holds a name of the parameter in POST request which is transfering username. For example, if the requests parameters were `usrname=johnsmth&password=SecretPwd55`, the username_parameter would be set to `usrname`. By default, this is set to `username`.
+
+### password_parameter
+**Usage:**
+```sh
+BP.py> set password_paramater <text>
+```
+password_parameters holds a name of the parameter in POST request which is transfering password. For example, if the requests parameters were `usrname=johnsmth&password=SecretPwd55`, the password_parameter would be set to `password`. By default, this is set to `password`.
 
 ### Running attack
 After we have set up all 5 required parameters (we can make sure and review the parameters by typing `values` command in BruteProxy.py console), let's run the attack by typing:
