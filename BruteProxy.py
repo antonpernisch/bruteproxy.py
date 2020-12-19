@@ -53,6 +53,7 @@ attack__wordlist = "(unset)"
 attack__username = "(unset)"
 attack__proxylist = "(unset)"
 attack__errIdentifier = "(unset)"
+attack__method = "post"
 attack__usernameParameterName = "username"
 attack__passwordParameterName = "password"
 
@@ -127,8 +128,9 @@ def cmd__set(param, value):
         print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "username: " + colors.ENDC + "Sets the username that will be bruteforced, ie. admin")
         print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "error_identifier: " + colors.ENDC + "Identifies error message (unsuccessful login try)")
         print(colors.OKCYAN + "[]" + colors.ENDC)
-        print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "username_parameter: " + colors.ENDC + "Sets the POST parameter name for username input")
-        print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "password_parameter: " + colors.ENDC + "Sets the POST parameter name for password input")
+        print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "method: " + colors.ENDC + "Sets the method to use while brute-forcing. Supported are get or post.")
+        print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "username_parameter: " + colors.ENDC + "Sets the request parameter name for username input")
+        print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "password_parameter: " + colors.ENDC + "Sets the request parameter name for password input")
     elif param == "target":
         global attack__target
         attack__target = value
@@ -157,6 +159,13 @@ def cmd__set(param, value):
         global attack__passwordParameterName
         attack__passwordParameterName = value
         print(colors.OKCYAN + "[" + colors.OKGREEN + colors.BOLD + "\u2713" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.DARK_CYAN + "Parameter \"password_parameter\" was set to " + colors.OKCYAN + value + colors.ENDC)
+    elif param == "method":
+        if value == "get" or value == "post":
+            global attack__method
+            attack__method = value
+            print(colors.OKCYAN + "[" + colors.OKGREEN + colors.BOLD + "\u2713" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.DARK_CYAN + "Parameter \"method\" was set to " + colors.OKCYAN + value + colors.ENDC)
+        else:
+            print(colors.OKCYAN + "[" + colors.FAIL + colors.BOLD + "!" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.FAIL + "Unknown value for attack method, supported methods are \"get\" and \"post\"" + colors.ENDC)
     else:
         print(colors.OKCYAN + "[" + colors.FAIL + colors.BOLD + "!" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.FAIL + "Unknown parameter, you can display all parameters by \"set options\"" + colors.ENDC)
 
@@ -169,6 +178,7 @@ def cmd__values():
     print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "username: " + colors.ENDC + attack__username)
     print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "error_identifier: " + colors.ENDC + attack__errIdentifier)
     print(colors.OKCYAN + "[]" + colors.ENDC)
+    print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "method: " + colors.ENDC + attack__method)
     print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "username_parameter: " + colors.ENDC + attack__usernameParameterName)
     print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "password_parameter: " + colors.ENDC + attack__passwordParameterName)
 
