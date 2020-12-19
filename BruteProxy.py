@@ -4,6 +4,10 @@ from signal import signal, SIGINT
 from sys import exit
 import re
 from Modules.Attacker import attacker
+import sys, getopt
+
+# build info
+build_version = "a1.0.0dev"
 
 # define colors
 # colors in ansi color coding
@@ -20,6 +24,20 @@ class colors:
     UNDERLINE = '\033[4m'
     DARK_CYAN = '\033[90m'
 
+# version checker handler
+if len(sys.argv) > 1:
+    # we've got some arguments in terminal, check for version or v argument
+    if sys.argv[1] == "-v" or sys.argv[1] == "-version":
+        # user requested version, print that and do not start the framework
+        print(" ")
+        print(colors.OKCYAN + "[" + colors.OKGREEN + colors.BOLD + "\u2713" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.DARK_CYAN + "BruteProxy.py framework installed and running on version " + colors.OKCYAN + build_version + colors.ENDC)
+        exit(0)
+    else:
+        print(" ")
+        print(colors.OKCYAN + "[" + colors.OKBLUE + colors.BOLD + "i" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.DARK_CYAN + "You can only use -v or -version parameter, others are not supported")
+        print(colors.OKCYAN + "[" + colors.OKBLUE + colors.BOLD + "i" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.DARK_CYAN + "BruteProxy.py not starting, to be safe. Please remove all unnecessary arguments.")
+        exit(0)
+
 # exit handler
 def handler(signal_received, frame):
     print("\n")
@@ -30,11 +48,11 @@ def handler(signal_received, frame):
 signal(SIGINT, handler)
 
 # set some default values
-attack__target = "https://playground.esec.sk/custom/brutelogin/login.php"
-attack__wordlist = "wordlist.txt"
-attack__username = "admin"
-attack__proxylist = "proxies.txt"
-attack__errIdentifier = "Error"
+attack__target = "(unset)"
+attack__wordlist = "(unset)"
+attack__username = "(unset)"
+attack__proxylist = "(unset)"
+attack__errIdentifier = "(unset)"
 
 # some regxes (it was pain, ngl)
 run__target_pattern = re.compile("^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$")
