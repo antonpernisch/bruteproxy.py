@@ -6,9 +6,6 @@ import re
 from Modules.Attacker import attacker
 import sys, getopt
 
-# build info
-build_version = "b1.0.0"
-
 # define colors
 # colors in ansi color coding
 class colors:
@@ -23,6 +20,30 @@ class colors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
     DARK_CYAN = '\033[90m'
+
+# build info
+build_version = "b1.1.0"
+
+# load current latest version from our CDN (preparation for updater module)
+try:
+    latest_version = requests.get("https://esec.sk/cdn/bruteproxy/latest_version.txt").text
+except:
+    print(colors.OKCYAN + "[" + colors.FAIL + colors.BOLD + "!" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.FAIL + "Couldn't get latest version from esec.sk CDN")
+
+# decide on version type (outdated, latest, dev)
+try:
+    if build_version.endswith("dev"):
+        # using dev version
+        version_type = "dev"
+    elif build_version == latest_version:
+        # using latest version
+        version_type = "latest"
+    else:
+        # outdated version
+        version_type = "outdated"
+except:
+    version_type = "unknown"
+    print(colors.OKCYAN + "[" + colors.FAIL + colors.BOLD + "!" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.FAIL + "Couldn't determine version type")
 
 # version checker handler
 if len(sys.argv) > 1:
@@ -53,8 +74,10 @@ attack__wordlist = "(unset)"
 attack__username = "(unset)"
 attack__proxylist = "(unset)"
 attack__errIdentifier = "(unset)"
+attack__method = "post"
 attack__usernameParameterName = "username"
 attack__passwordParameterName = "password"
+attack__custom_request = "False"
 
 # some regxes (it was pain, ngl)
 run__target_pattern = re.compile("^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$")
@@ -127,8 +150,11 @@ def cmd__set(param, value):
         print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "username: " + colors.ENDC + "Sets the username that will be bruteforced, ie. admin")
         print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "error_identifier: " + colors.ENDC + "Identifies error message (unsuccessful login try)")
         print(colors.OKCYAN + "[]" + colors.ENDC)
-        print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "username_parameter: " + colors.ENDC + "Sets the POST parameter name for username input")
-        print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "password_parameter: " + colors.ENDC + "Sets the POST parameter name for password input")
+        print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "method: " + colors.ENDC + "Sets the method to use while brute-forcing. Supported are get or post.")
+        print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "username_parameter: " + colors.ENDC + "Sets the request parameter name for username input")
+        print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "password_parameter: " + colors.ENDC + "Sets the request parameter name for password input")
+        print(colors.OKCYAN + "[]" + colors.ENDC)
+        print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "custom_request: " + colors.ENDC + "If you want to use a custom request, set this to \"True\" and make sure you've read wiki.")
     elif param == "target":
         global attack__target
         attack__target = value
@@ -157,6 +183,20 @@ def cmd__set(param, value):
         global attack__passwordParameterName
         attack__passwordParameterName = value
         print(colors.OKCYAN + "[" + colors.OKGREEN + colors.BOLD + "\u2713" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.DARK_CYAN + "Parameter \"password_parameter\" was set to " + colors.OKCYAN + value + colors.ENDC)
+    elif param == "method":
+        if value == "get" or value == "post":
+            global attack__method
+            attack__method = value
+            print(colors.OKCYAN + "[" + colors.OKGREEN + colors.BOLD + "\u2713" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.DARK_CYAN + "Parameter \"method\" was set to " + colors.OKCYAN + value + colors.ENDC)
+        else:
+            print(colors.OKCYAN + "[" + colors.FAIL + colors.BOLD + "!" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.FAIL + "Unknown value for attack method, supported methods are \"get\" and \"post\"" + colors.ENDC)
+    elif param == "custom_request":
+        if value == "True" or value == "False":
+            global attack__custom_request
+            attack__custom_request = value
+            print(colors.OKCYAN + "[" + colors.OKGREEN + colors.BOLD + "\u2713" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.DARK_CYAN + "Parameter \"custom_request\" was set to " + colors.OKCYAN + value + colors.ENDC)
+        else:
+            print(colors.OKCYAN + "[" + colors.FAIL + colors.BOLD + "!" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.FAIL + "Unknown value for custom request, supported values are \"True\" and \"False\"" + colors.ENDC)
     else:
         print(colors.OKCYAN + "[" + colors.FAIL + colors.BOLD + "!" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.FAIL + "Unknown parameter, you can display all parameters by \"set options\"" + colors.ENDC)
 
@@ -169,8 +209,11 @@ def cmd__values():
     print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "username: " + colors.ENDC + attack__username)
     print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "error_identifier: " + colors.ENDC + attack__errIdentifier)
     print(colors.OKCYAN + "[]" + colors.ENDC)
+    print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "method: " + colors.ENDC + attack__method)
     print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "username_parameter: " + colors.ENDC + attack__usernameParameterName)
     print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "password_parameter: " + colors.ENDC + attack__passwordParameterName)
+    print(colors.OKCYAN + "[]" + colors.ENDC)
+    print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "custom_request: " + colors.ENDC + attack__custom_request)
 
 # run
 def cmd__run():
@@ -182,6 +225,7 @@ def cmd__run():
 
     if(cmd__run_check_result == 400 and attack__username != "(unset)"):
         # everything's fine, proceed to actual bruteforce class
+        attacker.setup(0, attack__method, attack__custom_request)
         attacker.attack(0, attack__target, attack__username, attack__wordlist, attack__proxylist, attack__errIdentifier, attack__usernameParameterName, attack__passwordParameterName)
     else:
         # we've got something wrong, let's tell it to the user
@@ -251,7 +295,16 @@ print(colors.DARK_CYAN + "Exit by typing \"exit\" command or by pressing Ctrl+C"
 print(colors.DARK_CYAN + "Illegal usage is strongly restricted.")
 print(colors.DARK_CYAN + "(c) Anton Pernisch 2020" + colors.ENDC)
 print(" ")
-print(colors.DARK_CYAN + "Using version: " + colors.BOLD + build_version + colors.ENDC)
+if version_type == "latest":
+    print(colors.DARK_CYAN + "Using version: " + colors.BOLD + build_version + " (latest)" + colors.ENDC)
+elif version_type == "outdated":
+    print(colors.DARK_CYAN + "Using version: " + colors.BOLD + build_version + " (outdated, latest version is " + latest_version + ")" + colors.ENDC)
+    print(colors.OKCYAN + "[" + colors.OKBLUE + colors.BOLD + "i" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.DARK_CYAN + "Note that you are using outdated version, you're missing bugfixes and new features." + colors.ENDC)
+elif version_type == "dev":
+    print(colors.DARK_CYAN + "Using version: " + colors.BOLD + build_version + " (pre-release)" + colors.ENDC)
+    print(colors.OKCYAN + "[" + colors.FAIL + colors.BOLD + "!" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.FAIL + "Please note that you are using pre-release that is still in development." + colors.ENDC)
+else:
+    print(colors.DARK_CYAN + "Using version: " + colors.BOLD + build_version + colors.ENDC)
 print(" ")
 print(" ")
 print(" ")

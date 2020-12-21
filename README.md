@@ -138,6 +138,20 @@ BP.py> set password_paramater <text>
 ```
 password_parameters holds a name of the parameter in POST request which is transfering password. For example, if the requests parameters were `usrname=johnsmth&password=SecretPwd55`, the password_parameter would be set to `password`. By default, this is set to `password`.
 
+### method
+**Usage:**
+```sh
+BP.py> set method <post/get>
+```
+method is what method you want to use while sending requests to server. Right now, there are two avaiable types, that are GET or POST. Default is `post`.
+
+### custom_request
+**Usage:**
+```sh
+BP.py> set custom_request <True/False>
+```
+custom_request is a parameters that you have to set to `True` if you want to use a custom request with added parameters in it. More about this feature and how to set up `request.json` file is written in wiki on this GitHub, check it out.
+
 ### Running attack
 After we have set up all 5 required parameters (we can make sure and review the parameters by typing `values` command in BruteProxy.py console), let's run the attack by typing:
 ```sh
