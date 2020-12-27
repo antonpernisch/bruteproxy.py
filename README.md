@@ -13,9 +13,11 @@ Getting started tutorial: [Getting started with BruteProxy](https://github.com/e
 
 Everything can be found on GitHub wiki [here](https://github.com/esec-exploits/bruteproxy.py/wiki).
 
-## Contact & support
-Feel free to contact me at `exploits@esec.sk`. If you have found a bug or have some kind of issue, just create a new issue here on GitHub and I'll review it :)
+## Contact, Discord & support
+Feel free to contact me at Discord server (esecwtf#1901) or at `exploits@esec.sk`. If you have found a bug or have some kind of issue, just create a new issue here on GitHub and I'll review it :)
 Contributors are welcome, just submit a pull request and I'll take a look.
+
+**Discord server:** [here](https://discord.gg/ktRUMu2yyF)
 
 ## Legal notice
 Keep in mind that this tool was made and is maintained for legal activities and only can be used on victims that **agreed and are acknowledged** about this type of attack. BruteProxy developers, contributors, and associated teams, companies, and services are *not* responsible for any damage or legal responsibilities caused by using this tool. BruteProxy is a tool made for white-hat pentesters.
