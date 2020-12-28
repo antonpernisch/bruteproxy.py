@@ -22,13 +22,13 @@ class colors:
     DARK_CYAN = '\033[90m'
 
 # build info
-build_version = "b1.1.0"
+build_version = "b1.2.0dev"
 
 # load current latest version from our CDN (preparation for updater module)
 try:
     latest_version = requests.get("https://esec.sk/cdn/bruteproxy/latest_version.txt").text
 except:
-    print(colors.OKCYAN + "[" + colors.FAIL + colors.BOLD + "!" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.FAIL + "Couldn't get latest version from esec.sk CDN")
+    print(colors.OKCYAN + "[" + colors.WARNING + colors.BOLD + "!" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.WARNING + "Couldn't get latest version from esec.sk CDN" + colors.ENDC)
 
 # decide on version type (outdated, latest, dev)
 try:
@@ -43,7 +43,7 @@ try:
         version_type = "outdated"
 except:
     version_type = "unknown"
-    print(colors.OKCYAN + "[" + colors.FAIL + colors.BOLD + "!" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.FAIL + "Couldn't determine version type")
+    print(colors.OKCYAN + "[" + colors.WARNING + colors.BOLD + "!" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.WARNING + "Couldn't determine version type" + colors.ENDC)
 
 # version checker handler
 if len(sys.argv) > 1:
@@ -80,17 +80,18 @@ attack__passwordParameterName = "password"
 attack__custom_request = "False"
 
 # some regxes (it was pain, ngl)
-run__target_pattern = re.compile("^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$")
-run__proxylist_pattern = re.compile("(.*).\.txt$")
-run__wordlist_pattern = re.compile("(.*).\.txt$")
+run__target_pattern_ip = re.compile(r"^^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(:([0-9])([0-9])?([0-9])?([0-9])?([0-9])?)?$")
+run__target_pattern_domain = re.compile(r"^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$")
+run__proxylist_pattern = re.compile(r"(.*).\.txt$")
+run__wordlist_pattern = re.compile(r"(.*).\.txt$")
 
 # --- ~~~ ---
 # | HELPERS SECTION |
 # --- ~~~ ---
 
 # run command: checking some entered values
-def cmd__run_check():
-    if attack__target != "(unset)" and run__target_pattern.match(attack__target):
+def cmd__run_check(attack__target, attack__wordlist, attack__proxylist):
+    if attack__target != "(unset)" and (run__target_pattern_ip.match(attack__target) or run__target_pattern_domain.match(attack__target)):
         # target matched, proceed
         if attack__proxylist != "(unset)" and run__proxylist_pattern.match(attack__proxylist):
             # proxylist matched, proceed to last, wordlist
@@ -99,13 +100,13 @@ def cmd__run_check():
                 # ps. we do not need to check username, since it can be anything :)
                 return 400
             else:
-                # wordlist not set or redex not matched oof
+                # wordlist not set or regex not matched oof
                 return 300
         else:
-            # proxylist not set or redex not matched oof
+            # proxylist not set or regex not matched oof
             return 200
     else:
-        # target not set or redex not matched oof
+        # target not set or regex not matched oof
         return 100
 
 # --- ~~~ ---
@@ -221,9 +222,8 @@ def cmd__run():
     # firstly, let's check if all paramtere are fulfilled and compare them with regex (pain in the ass) if everything's alright
 
     # run the check
-    cmd__run_check_result = cmd__run_check()
-
-    if(cmd__run_check_result == 400 and attack__username != "(unset)"):
+    cmd__run_check_result = cmd__run_check(attack__target, attack__wordlist, attack__proxylist)
+    if cmd__run_check_result == 400 and attack__username != "(unset)":
         # everything's fine, proceed to actual bruteforce class
         attacker.setup(0, attack__method, attack__custom_request)
         attacker.attack(0, attack__target, attack__username, attack__wordlist, attack__proxylist, attack__errIdentifier, attack__usernameParameterName, attack__passwordParameterName)
@@ -231,7 +231,7 @@ def cmd__run():
         # we've got something wrong, let's tell it to the user
         if cmd__run_check_result == 100:
             # 100 means problem with target
-            print(colors.OKCYAN + "[" + colors.FAIL + colors.BOLD + "!" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.FAIL + "Not set or wrong target format, ensure that it is starting with http:// and it's valid URL/IPv4" + colors.ENDC)
+            print(colors.OKCYAN + "[" + colors.FAIL + colors.BOLD + "!" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.FAIL + "Not set or wrong target format, ensure that it is starting with http:// or https:// and it's valid URL/IPv4" + colors.ENDC)
         elif cmd__run_check_result == 200:
             # 200 means problem with proxylist
             print(colors.OKCYAN + "[" + colors.FAIL + colors.BOLD + "!" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.FAIL + "Not set or wrong proxylist format, ensure that it is ending with .txt and it's full path" + colors.ENDC)
@@ -302,7 +302,7 @@ elif version_type == "outdated":
     print(colors.OKCYAN + "[" + colors.OKBLUE + colors.BOLD + "i" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.DARK_CYAN + "Note that you are using outdated version, you're missing bugfixes and new features." + colors.ENDC)
 elif version_type == "dev":
     print(colors.DARK_CYAN + "Using version: " + colors.BOLD + build_version + " (pre-release)" + colors.ENDC)
-    print(colors.OKCYAN + "[" + colors.FAIL + colors.BOLD + "!" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.FAIL + "Please note that you are using pre-release that is still in development." + colors.ENDC)
+    print(colors.OKCYAN + "[" + colors.WARNING + colors.BOLD + "!" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.WARNING + "Please note that you are using pre-release that is still in development." + colors.ENDC)
 else:
     print(colors.DARK_CYAN + "Using version: " + colors.BOLD + build_version + colors.ENDC)
 print(" ")
