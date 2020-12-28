@@ -13,7 +13,7 @@ class colors:
 
 class utilities:
     def Question(self, text):
-        print(colors.OKCYAN + "[" + colors.OKBLUE + colors.BOLD + "?" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.DARK_CYAN + text + " Answer with Y (means yes) or N (means no): [Y/N]" + colors.ENDC, end=" ")
+        print(colors.OKCYAN + "[" + colors.OKBLUE + colors.BOLD + "?" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.DARK_CYAN + text + " Answer with Y (means yes) or N (means no): [Y/n]" + colors.ENDC, end=" ")
         answer = input()
         if answer == "" or answer == "y" or answer == "yes" or answer == "Y":
             return True
@@ -21,3 +21,10 @@ class utilities:
             return False
         else:
             utilities.Question(0, text)
+
+    # line counter
+    def file_len(self, fname):
+            with open(fname) as f:
+                for i, l in enumerate(f):
+                    pass
+            return i + 1
