@@ -1,4 +1,4 @@
-![logo](https://storage.esec.sk/saved_data/282922.png)
+![logo](https://storage.esec.sk/saved_data/961104.png)
 
 [![Build Status](https://travis-ci.com/esec-exploits/bruteproxy.py.svg?branch=main)](https://travis-ci.com/esec-exploits/bruteproxy.py) ![status](https://img.shields.io/badge/status-beta-blue) ![Issues](https://img.shields.io/github/issues/esec-exploits/bruteproxy.py) ![commits](https://img.shields.io/github/commits-since/esec-exploits/bruteproxy.py/b1.1.0)
 
