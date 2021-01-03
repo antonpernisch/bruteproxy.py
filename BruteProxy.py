@@ -4,6 +4,7 @@ from signal import signal, SIGINT
 from sys import exit
 import re
 from Modules.Attacker import attacker
+from Modules.Rotater import rotater
 import sys, getopt
 import random
 
@@ -33,7 +34,7 @@ class completer_class(object):
             return None
 
 # text to complete
-completer = completer_class(["set ", "help", "values", "help", "exit", "run", "threads ", "target ", "wordlist ", "proxylist ", "username ", "error_identifier ", "method ", "username_parameter ", "password_parameter ", "custom_request ", "cookies ", "options", "True", "False"])
+completer = completer_class(["set ", "help", "values", "help", "exit", "run", "threads ", "target ", "wordlist ", "proxylist ", "username ", "error_identifier ", "method ", "username_parameter ", "password_parameter ", "custom_request ", "cookies ", "options", "True", "False", "proxylooping ", "proxychange "])
 readline.set_completer(completer.complete)
 readline.parse_and_bind('tab: complete')
 
@@ -53,7 +54,7 @@ class colors:
     DARK_CYAN = '\033[90m'
 
 # build info
-build_version = "b1.2.1dev"
+build_version = "b1.3.0dev"
 
 # version checker handler
 if len(sys.argv) > 1:
@@ -102,10 +103,10 @@ def handler(signal_received, frame):
 
     print(colors.OKCYAN + "\n\n[" + colors.OKBLUE + colors.BOLD + "i" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.DARK_CYAN + "Terminating all threads and doing cleanup, please wait..." + colors.ENDC)
     try:
+        rotater.run = False
         attacker.threads__run = False
         for threadNumToKill in range(0, attacker.threadsCount):
             attacker.attack_threads[threadNumToKill].join()
-            print("[DEBUG] Thread " + threadNumToKill + " has been killed")
     except:
         print("", end = "")
     print(colors.OKCYAN + "[" + colors.OKBLUE + colors.BOLD + "i" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.DARK_CYAN + "Exitting..." + colors.ENDC)
@@ -126,6 +127,8 @@ attack__passwordParameterName = "password"
 attack__custom_request = "False"
 attack__cookies = "False"
 attack__mt_threads = 4
+attack__proxylooping = "False"
+attack__proxychange = 10
 
 # DANGEROUS, EDIT ONLY FOR OVERCLOCKING
 threads_maximum = 100
@@ -146,23 +149,33 @@ run__wordlist_pattern = re.compile(r"(.*).\.txt$")
 def cmd__run_check(attack__target, attack__wordlist, attack__proxylist):
     if attack__target != "(unset)" and (run__target_pattern_ip.match(attack__target) or run__target_pattern_domain.match(attack__target)):
         # target matched, proceed
-        if attack__proxylist != "(unset)" and run__proxylist_pattern.match(attack__proxylist):
-            # proxylist matched, proceed to wordlist
-            if attack__wordlist != "(unset)" and run__wordlist_pattern.match(attack__wordlist):
-                # wordlist matched, proceed to last
-                if attack__mt_threads <= threads_maximum and attack__mt_threads > 0:
+        if attack__wordlist != "(unset)" and run__wordlist_pattern.match(attack__wordlist):
+            # wordlist matched, proceed to last
+            if attack__mt_threads <= threads_maximum and attack__mt_threads > 0:
+                # this check is done only if user enabled proxy looping feature
+                if attack__proxylooping == "True":
+                    if attack__proxylist != "(unset)" and run__proxylist_pattern.match(attack__proxylist):
+                        # proxylist matched, proceed to check number
+                        if attack__proxychange >= 1:
+                            # everything matched, return 400 as everything is OK
+                            # ps. we do not need to check username, since it can be anything :)
+                            return 400
+                        else:
+                            # proxychange value is smaller than 1, code 360
+                            return 360
+                    else:
+                        # proxylist not set or regex not matched oof
+                        return 200
+                else:
                     # everything matched, return 400 as everything is OK
                     # ps. we do not need to check username, since it can be anything :)
                     return 400
-                else:
-                    # too high or low threads count
-                    return 350
             else:
-                # wordlist not set or regex not matched oof
-                return 300
+                # too high or low threads count
+                return 350
         else:
-            # proxylist not set or regex not matched oof
-            return 200
+            # wordlist not set or regex not matched oof
+            return 300
     else:
         # target not set or regex not matched oof
         return 100
@@ -203,9 +216,9 @@ def cmd__exit():
     print(colors.OKCYAN + "\n\n[" + colors.OKBLUE + colors.BOLD + "i" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.DARK_CYAN + "Terminating all threads and doing cleanup, please wait..." + colors.ENDC)
     try:
         attacker.threads__run = False
+        rotater.run = False
         for threadNumToKill in range(0, attacker.threadsCount):
             attacker.attack_threads[threadNumToKill].join()
-            print("[DEBUG] Thread " + threadNumToKill + " has been killed")
     except:
         print("", end = "")
     print(colors.OKCYAN + "[" + colors.OKBLUE + colors.BOLD + "i" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.DARK_CYAN + "Exitting..." + colors.ENDC)
@@ -215,17 +228,16 @@ def cmd__exit():
 def cmd__set(param, value):
     if param == "options":
         # required options are username, password wordlist, proxylist, error_identifier and URL address
-        print(colors.OKCYAN + "[] " + colors.ENDC + colors.BOLD + "\"set\" command usage: " + colors.ENDC + "set [parameter to set] [value to be set up]")
-        print(colors.OKCYAN + "[] " + colors.ENDC + colors.BOLD + "Exmple: " + colors.ENDC + "set target http://my-vuln-site.com " + colors.BOLD + "or " + colors.ENDC + "set wordlist /home/wordlists/wl.txt")
+        print(colors.OKCYAN + "[] " + colors.ENDC + colors.BOLD + colors.UNDERLINE + "\"set\" command usage:" + colors.ENDC + " set [parameter to set] [value to be set up]")
+        print(colors.OKCYAN + "[] " + colors.ENDC + colors.BOLD + colors.UNDERLINE + "Exmple:" + colors.ENDC + " set target http://my-vuln-site.com " + colors.BOLD + "or " + colors.ENDC + "set wordlist /home/wordlists/wl.txt")
         print(colors.OKCYAN + "[] " + colors.ENDC + " ")
         print(colors.OKCYAN + "[] " + colors.ENDC + colors.BOLD + "REQUIRED PARAMETERS BEFORE RUNNING ATTACK:" + colors.ENDC)
         print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "target: " + colors.ENDC + "Sets the target URL od IPv4 address, ie. http://vuln-site.com or http://183.192.21.22/login")
         print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "wordlist: " + colors.ENDC + "Sets the wordlist to use for bruteforce, ie. /home/wordlists/wl.txt")
-        print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "proxylist: " + colors.ENDC + "Sets the proxylist that will be used while bruteforcing, ie. /proxies/proxylist.txt")
         print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "username: " + colors.ENDC + "Sets the username that will be bruteforced, ie. admin")
         print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "error_identifier: " + colors.ENDC + "Identifies error message (unsuccessful login try)")
         print(colors.OKCYAN + "[]" + colors.ENDC)
-        print(colors.OKCYAN + "[] " + colors.ENDC)
+        print(colors.OKCYAN + "[]" + colors.ENDC)
         print(colors.OKCYAN + "[] " + colors.ENDC + colors.BOLD + "ADDITIONAL PARAMETERS:" + colors.ENDC)
         print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "method: " + colors.ENDC + "Sets the method to use while brute-forcing. Supported are get or post.")
         print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "username_parameter: " + colors.ENDC + "Sets the request parameter name for username input")
@@ -233,6 +245,12 @@ def cmd__set(param, value):
         print(colors.OKCYAN + "[]" + colors.ENDC)
         print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "custom_request: " + colors.ENDC + "If you want to use a custom request, set this to \"True\" and MAKE SURE you've read wiki.")
         print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "cookies: " + colors.ENDC + "If you want to use some cookies, set this to \"True\" and MAKE SURE you've read wiki.")
+        print(colors.OKCYAN + "[]" + colors.ENDC)
+        print(colors.OKCYAN + "[]" + colors.ENDC)
+        print(colors.OKCYAN + "[] " + colors.ENDC + colors.BOLD + "PROXY LOOPING FEATURE:" + colors.ENDC)
+        print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "proxylooping: " + colors.ENDC + "This must be set to \"True\" if you want to use this feature. Default is \"False\"")
+        print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "proxylist: " + colors.ENDC + "Sets the proxylist that will be used while bruteforcing, ie. /proxies/proxylist.txt")
+        print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "proxychange: " + colors.ENDC + "This number determines after how many attempts will be proxy changed")
     elif param == "target":
         global attack__target
         attack__target = value
@@ -282,18 +300,36 @@ def cmd__set(param, value):
             print(colors.OKCYAN + "[" + colors.OKGREEN + colors.BOLD + "\u2713" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.DARK_CYAN + "Parameter \"cookies\" was set to " + colors.OKCYAN + value + colors.ENDC)
         else:
             print(colors.OKCYAN + "[" + colors.FAIL + colors.BOLD + "!" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.FAIL + "Unknown value for cookies, supported values are \"True\" and \"False\"" + colors.ENDC)
+    elif param == "proxychange":
+        try:
+            global attack__proxychange
+            attack__proxychange = int(value)
+            print(colors.OKCYAN + "[" + colors.OKGREEN + colors.BOLD + "\u2713" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.DARK_CYAN + "Parameter \"proxychange\" was set to " + colors.OKCYAN + value + colors.ENDC)
+        except:
+            # convertion was unsuccessful
+            print(colors.OKCYAN + "[" + colors.FAIL + colors.BOLD + "!" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.FAIL + "Enter only number" + colors.ENDC)
+    elif param == "proxylooping":
+        if value == "True" or value == "False":
+            global attack__proxylooping
+            attack__proxylooping = value
+            print(colors.OKCYAN + "[" + colors.OKGREEN + colors.BOLD + "\u2713" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.DARK_CYAN + "Parameter \"proxylooping\" was set to " + colors.OKCYAN + value + colors.ENDC)
+        else:
+            print(colors.OKCYAN + "[" + colors.FAIL + colors.BOLD + "!" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.FAIL + "Unknown value for proxylooping, supported values are \"True\" and \"False\"" + colors.ENDC)
     else:
         print(colors.OKCYAN + "[" + colors.FAIL + colors.BOLD + "!" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.FAIL + "Unknown parameter, you can display all parameters by \"set options\"" + colors.ENDC)
 
 # values
 def cmd__values():
-    print(colors.OKCYAN + "[] " + colors.ENDC + colors.BOLD + "Currently set up values (all of these must be set before running attack):" + colors.ENDC)
+    print(colors.OKCYAN + "[] " + colors.ENDC + colors.BOLD + colors.UNDERLINE + "Currently set up values:" + colors.ENDC)
+    print(colors.OKCYAN + "[] " + colors.ENDC + " ")
+    print(colors.OKCYAN + "[] " + colors.ENDC + colors.BOLD + "REQUIRED PARAMETERS BEFORE RUNNING ATTACK:" + colors.ENDC)
     print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "target: " + colors.ENDC + attack__target)
     print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "wordlist: " + colors.ENDC + attack__wordlist)
-    print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "proxylist: " + colors.ENDC + attack__proxylist)
     print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "username: " + colors.ENDC + attack__username)
     print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "error_identifier: " + colors.ENDC + attack__errIdentifier)
     print(colors.OKCYAN + "[]" + colors.ENDC)
+    print(colors.OKCYAN + "[]" + colors.ENDC)
+    print(colors.OKCYAN + "[] " + colors.ENDC + colors.BOLD + "ADDITIONAL PARAMETERS:" + colors.ENDC)
     print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "method: " + colors.ENDC + attack__method)
     print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "username_parameter: " + colors.ENDC + attack__usernameParameterName)
     print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "password_parameter: " + colors.ENDC + attack__passwordParameterName)
@@ -301,7 +337,15 @@ def cmd__values():
     print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "custom_request: " + colors.ENDC + attack__custom_request)
     print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "cookies: " + colors.ENDC + attack__cookies)
     print(colors.OKCYAN + "[]" + colors.ENDC)
+    print(colors.OKCYAN + "[]" + colors.ENDC)
+    print(colors.OKCYAN + "[] " + colors.ENDC + colors.BOLD + "MULTI-THREADING:" + colors.ENDC)
     print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "threads: " + colors.ENDC + str(attack__mt_threads))
+    print(colors.OKCYAN + "[]" + colors.ENDC)
+    print(colors.OKCYAN + "[]" + colors.ENDC)
+    print(colors.OKCYAN + "[] " + colors.ENDC + colors.BOLD + "PROXY LOOPING:" + colors.ENDC)
+    print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "proxylooping: " + colors.ENDC + attack__proxylooping)
+    print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "proxylist: " + colors.ENDC + attack__proxylist)
+    print(colors.OKCYAN + "[] " + colors.ENDC + "     " + colors.BOLD + "proxychange: " + colors.ENDC + str(attack__proxychange))
 
 # run
 def cmd__run():
@@ -312,8 +356,8 @@ def cmd__run():
     cmd__run_check_result = cmd__run_check(attack__target, attack__wordlist, attack__proxylist)
     if cmd__run_check_result == 400 and attack__username != "(unset)":
         # everything's fine, proceed to actual bruteforce class
-        attacker.setup(0, attack__method, attack__custom_request, attack__cookies, attack__mt_threads)
-        attacker.attack(0, attack__target, attack__username, attack__wordlist, attack__proxylist, attack__errIdentifier, attack__usernameParameterName, attack__passwordParameterName)
+        attacker.setup(0, attack__method, attack__custom_request, attack__cookies, attack__mt_threads, attack__proxylooping, attack__proxylist, attack__proxychange)
+        attacker.attack(0, attack__target, attack__username, attack__wordlist, attack__errIdentifier, attack__usernameParameterName, attack__passwordParameterName)
     else:
         # we've got something wrong, let's tell it to the user
         if cmd__run_check_result == 100:
@@ -331,6 +375,9 @@ def cmd__run():
         elif attack__username == "(unset)":
             # username is empty, fix that please
             print(colors.OKCYAN + "[" + colors.FAIL + colors.BOLD + "!" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.FAIL + "Username not set" + colors.ENDC)
+        elif cmd__run_check_result == 360:
+            # 360 means problem with proxychange number
+            print(colors.OKCYAN + "[" + colors.FAIL + colors.BOLD + "!" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.FAIL + "proxychange value is too low (under 1)" + colors.ENDC)
         else:
             # oops, this is bad
             print(colors.OKCYAN + "[" + colors.FAIL + colors.BOLD + "!" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.FAIL + "Unexpected error, ensure that everything is set up correctly by typing \"values\"" + colors.ENDC)
