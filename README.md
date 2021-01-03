@@ -14,7 +14,7 @@ $ git clone --single-branch --branch pre-production https://github.com/esec-expl
 Please note that pre-production versions can be unstable and have *dev* marking at the end.
 
 ## IMPORTANT
-Currently, since BruteProxy is still in development, looping proxies are not included in the release. However, the working prototype is already born and after negotiations with the proxies sponsor, we will be able to release the *b1.2.0* version, which will contain the proxy looping.
+Currently, since BruteProxy is still in development, looping proxies are not included in the release. However, the working prototype is already born and after negotiations with the proxies sponsor, we will be able to release the *b1.3.0* version, which will contain the proxy looping. **Also, this version is available as pre-release. Check out the pre-production branch ;)**
 
 ## Getting started, usage and wiki
 Getting started tutorial: [Getting started with BruteProxy](https://github.com/esec-exploits/bruteproxy.py/wiki/Getting-started)
