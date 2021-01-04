@@ -5,9 +5,6 @@
 ## What's this about?
 Have you ever been brute-forcing and got IP-banned because the website has a limited amount of tries? Well, in most cases, this blocking system identifies you based on your IPv4 address. BruteProxy is **multi-threaded brute-forcing script with looping proxies**, that are taken from the provided proxylist. BruteProxy.py has a built-in console and Metasploit-like commands (set, run, etc.) to easily access all its features.
 
-## IMPORTANT
-Documentation (wiki) for new features are not available at the moment, but as soon as this pre-release will be published as *b1.3.0*, wiki will be available.
-
 ## Getting started, usage and wiki
 Getting started tutorial: [Getting started with BruteProxy](https://github.com/esec-exploits/bruteproxy.py/wiki/Getting-started)
 
