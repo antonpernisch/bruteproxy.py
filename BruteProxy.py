@@ -54,7 +54,7 @@ class colors:
     DARK_CYAN = '\033[90m'
 
 # build info
-build_version = "b1.3.0dev"
+build_version = "b1.3.0"
 
 # version checker handler
 if len(sys.argv) > 1:
