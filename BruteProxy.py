@@ -116,9 +116,9 @@ def handler(signal_received, frame):
 signal(SIGINT, handler)
 
 # set some default values
-attack__target = "https://playground.esec.sk/custom/brutelogin/login.php"
-attack__wordlist = "c:\\Users\\perni\\Downloads\\rockyou.txt"
-attack__username = "admin"
+attack__target = "(unset)"
+attack__wordlist = "(unset)"
+attack__username = "(unset)"
 attack__proxylist = "(unset)"
 attack__errIdentifier = "incorrect"
 attack__method = "post"
