@@ -47,6 +47,7 @@ class attacker:
         attacker.threads__pause = False
         attacker.badResponse_counter = 0
         attacker.algDetection_reserve = False
+        attacker.spinner__pause = False
 
         attacker.susPwds = list()
 
@@ -54,11 +55,17 @@ class attacker:
         attacker.proxylooping = proxylooping
         attacker.proxylist = proxylist
         attacker.proxychange = proxychange
+        attacker.failedDecodes = 0
+        attacker.wantsContinueDecode = False
+        attacker.decodeErrReserved = False
 
     def spinner(self):
         for c in itertools.cycle(['Ooooooo', 'oOooooo', 'ooOoooo', 'oooOooo', 'ooooOoo', 'oooooOo', 'ooooooO', 'oooooOo', 'ooooOoo', 'oooOooo', 'ooOoooo', 'oOooooo', 'Ooooooo']):
             if attacker.spinner__done:
                 break
+            if attacker.spinner__pause:
+                time.sleep(0.1)
+                continue
             sys.stdout.write('\r' + colors.DARK_CYAN + c + colors.ENDC)
             sys.stdout.write(" " + colors.DARK_CYAN + colors.BOLD + "Progress: " + colors.ENDC + colors.DARK_CYAN + str(attacker.nextPwdLine - 1) + "/" + str(attacker.wordlist_len) + colors.ENDC)
             sys.stdout.flush()
@@ -80,7 +87,42 @@ class attacker:
                     attacker.threads__run = False
 
                 # prepare paswords in current try
-                password = linecache.getline(wordlist, currentPwdLine).strip()
+                try:
+                    password = linecache.getline(wordlist, currentPwdLine).strip()
+                except UnicodeDecodeError: 
+                    attacker.failedDecodes = attacker.failedDecodes + 1
+                    attacker.spinner__pause = True
+                    print("\r", end = "")
+                    if attacker.failedDecodes >= 8 and not attacker.wantsContinueDecode and not attacker.decodeErrReserved:
+                        attacker.decodeErrReserved = True
+                        attacker.threads__pause = True
+                        attacker.spinner__pause = True
+                        print("\r", end = "")
+
+                        # we have failed to decode 8 passwords in a row, something is wrong
+                        if utilities.Question(0, "Do you want to continue, even when we're unable to read the wordlist?"):
+                            # user wants to continue for some reason, set the flag and go
+                            attacker.wantsContinueDecode = True
+                            attacker.threads__pause = False
+                            attacker.spinner__pause = False
+                            print(colors.OKCYAN + "[" + colors.OKBLUE + colors.BOLD + "i" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.DARK_CYAN + "Continuing in the attack, sending blank passwords..." + colors.ENDC)
+                            continue
+                        else:
+                            # he doesnt, end
+                            attacker.threads__pause = False
+                            attacker.threads__run = False
+                            print(colors.OKCYAN + "[" + colors.OKBLUE + colors.BOLD + "i" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.DARK_CYAN + "Attack unsuccessful, wasn't able to decode passwords" + colors.ENDC)
+                            break
+                    elif attacker.failedDecodes < 8 and not attacker.wantsContinueDecode and not attacker.threads__pause:
+                        sys.stdout.write(colors.OKCYAN + "[" + colors.WARNING + colors.BOLD + "!" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.WARNING + "Couldn't decode password on line " + str(currentPwdLine) + ", skipping\n" + colors.ENDC)
+                        continue
+                    elif not attacker.threads__pause:
+                        password = ""
+                        attacker.spinner__pause = False
+                        continue
+                    else:
+                        continue
+
                 # replace variables in template and convert it into dict
                 request_template = request_template_raw.replace("$username$", username).replace("$password$", password).replace("$username_parameter$", username_parameter).replace("$password_parameter$", password_parameter)
                 currentRequestObj = json.loads(request_template)
@@ -362,6 +404,8 @@ class attacker:
                     print(colors.OKCYAN + "[" + colors.FAIL + colors.BOLD + "!" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.FAIL + "There was an unexpected error in main loop, please make sure that everything is set up correctly" + colors.ENDC)
             else:
                 # wordlist too short
+                attacker.spinner__done = True
                 print(colors.OKCYAN + "[" + colors.FAIL + colors.BOLD + "!" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.FAIL + "Wordlist is in wrong format or is too short (it must contain atleast 5 items)" + colors.ENDC)
         except:
+            attacker.spinner__done = True
             print(colors.OKCYAN + "[" + colors.FAIL + colors.BOLD + "!" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.FAIL + "Unexpected error, ensure that everything is set up correctly" + colors.ENDC)

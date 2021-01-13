@@ -10,8 +10,8 @@ import random
 
 try:
     import readline
-except:
-    pass
+except ImportError:
+    import pyreadline as readline
 
 # init completer
 class completer_class(object):
@@ -54,7 +54,7 @@ class colors:
     DARK_CYAN = '\033[90m'
 
 # build info
-build_version = "b1.3.0"
+build_version = "b1.3.1"
 
 # version checker handler
 if len(sys.argv) > 1:
@@ -116,11 +116,11 @@ def handler(signal_received, frame):
 signal(SIGINT, handler)
 
 # set some default values
-attack__target = "(unset)"
-attack__wordlist = "(unset)"
-attack__username = "(unset)"
+attack__target = "https://playground.esec.sk/custom/brutelogin/login.php"
+attack__wordlist = "c:\\Users\\perni\\Downloads\\rockyou.txt"
+attack__username = "admin"
 attack__proxylist = "(unset)"
-attack__errIdentifier = "(unset)"
+attack__errIdentifier = "incorrect"
 attack__method = "post"
 attack__usernameParameterName = "username"
 attack__passwordParameterName = "password"

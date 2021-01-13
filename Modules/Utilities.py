@@ -24,7 +24,23 @@ class utilities:
 
     # line counter
     def file_len(self, fname):
+        print(colors.OKCYAN + "[" + colors.OKBLUE + colors.BOLD + "i" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.DARK_CYAN + "Decoding lists..." + colors.ENDC)
+        try:
+            # try with default, utf-8 encoding
             with open(fname) as f:
                 for i, l in enumerate(f):
                     pass
-            return i + 1
+        except:
+            # problem, lets see if changing the encoding to latin helps
+            print(colors.OKCYAN + "[" + colors.WARNING + colors.BOLD + "!" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.WARNING + "Couldn't decode selected list with standart UTF-8, trying Latin-1..." + colors.ENDC)
+            try:
+                i = 0
+                with open(fname, encoding="latin-1") as f:
+                    for i, l in enumerate(f):
+                        pass
+            except:
+                # couldn't decode the list, die
+                print(colors.OKCYAN + "[" + colors.FAIL + colors.BOLD + "!" + colors.ENDC + colors.OKCYAN + "]" + " " + colors.ENDC + colors.FAIL + "Couldn't decode selected list" + colors.ENDC)
+                exit(0)
+        
+        return i + 1
