@@ -1,6 +1,6 @@
 ![logo](https://storage.esec.sk/saved_data/961104.png)
 
-[![Build Status](https://travis-ci.com/esec-exploits/bruteproxy.py.svg?branch=main)](https://travis-ci.com/esec-exploits/bruteproxy.py) ![status](https://img.shields.io/badge/status-beta-blue) ![Issues](https://img.shields.io/github/issues/esec-exploits/bruteproxy.py) ![commits](https://img.shields.io/github/commits-since/esec-exploits/bruteproxy.py/b1.3.0)
+[![Build Status](https://travis-ci.com/esec-exploits/bruteproxy.py.svg?branch=main)](https://travis-ci.com/esec-exploits/bruteproxy.py) ![status](https://img.shields.io/badge/status-beta-blue) ![Issues](https://img.shields.io/github/issues/esec-exploits/bruteproxy.py) ![commits](https://img.shields.io/github/commits-since/esec-exploits/bruteproxy.py/b1.3.1)
 
 ## What's this about?
 Have you ever been brute-forcing and got IP-banned because the website has a limited amount of tries? Well, in most cases, this blocking system identifies you based on your IPv4 address. BruteProxy is **multi-threaded brute-forcing script with looping proxies**, that are taken from the provided proxylist. BruteProxy.py has a built-in console and Metasploit-like commands (set, run, etc.) to easily access all its features.
