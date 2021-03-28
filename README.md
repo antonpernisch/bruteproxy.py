@@ -11,7 +11,7 @@ Getting started tutorial: [Getting started with BruteProxy](https://github.com/e
 Everything can be found on GitHub wiki [here](https://github.com/esec-exploits/bruteproxy.py/wiki).
 
 ## Contact, Discord & support
-Feel free to contact me at Discord server (esec#0001) or at `exploits@esec.sk`. If you have found a bug or have some kind of issue, just create a new issue here on GitHub and I'll review it :)
+Feel free to contact me at Discord (esec#0001) or at `exploits@esec.sk`. If you have found a bug or have some kind of issue, just create a new issue here on GitHub and I'll review it :)
 Contributors are welcome, just submit a pull request and I'll take a look.
 
 ## Legal notice
