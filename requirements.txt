@@ -2,3 +2,4 @@ requests[security] == 2.21.0
 readline
 linecache-light
 regex
+urllib3>=1.26.18 # not directly required, pinned by Snyk to avoid a vulnerability
